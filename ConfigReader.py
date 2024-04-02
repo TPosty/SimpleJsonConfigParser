@@ -23,7 +23,7 @@ class config_reader():
                     # Check if there are other arguments, currently only supports argument for setup data.
                     if args:
                         try:
-                            json_data = json.dumps(args[0], ensure_ascii=False, indent=2)
+                            json_data = json.dumps(args[0], ensure_ascii=False, indent=4)
                             config.write(json_data)
                             config.close()
                             print("Found data passed as argument. Wrote data to config file successfully!")
@@ -35,7 +35,7 @@ class config_reader():
             except Exception as error:
                 print(error)
 
-    def add_section(self, config_path, section_key: str, *args, **kwargs):
+    def add_section(self, config_path, section_key: str):
         valid_config = False
 
         if os.path.exists(config_path):
@@ -47,31 +47,107 @@ class config_reader():
             f"{section_key}": {}
         }
         # First need to make sure that the key is not already inside of the config file
-        with open(config_path, 'r+') as config:
-            old_config_data = json.load(config)
-            print(old_config_data)
+        if valid_config:
+            with open(config_path, 'r+') as config:
+                try:
+                    old_config_data = json.load(config)
+                    print(old_config_data)
+                except json.decoder.JSONDecodeError:
+                    old_config_data = {}
+                    print("No config data so initialized with basic data.")
+                
 
-            new_config_data = old_config_data | new_data
-            
-            for key, value in old_config_data.items():
-                if section_key == key:
-                    print(f"The key: {section_key} is already present!")
+                if section_key in old_config_data:
+                    print(f"The key: {section_key} was already present!")
                 else:
-                    print(f"Creating new section: {section_key}")
+                    try:
+                        old_config_data.update(new_data)
+
+                        config.seek(0)
+
+                        json.dump(old_config_data, config, indent=4)
+
+                        config.truncate()
+                        print(f"Created new section: {section_key}")
+                    except Exception as error:
+                        print(error)
+        else:
+            print("Could not find the config path...")
+
+
+    # Add a key, value pair to a config file.  
+    def add_key(self, config_path, parent_section, key: str, value: any):
+        valid_config = False
+
+        # Checks to make sure that the config actually exists before making any modifications to it.
+        if os.path.exists(config_path):
+            valid_config = True
+        else:
+            valid_config = False
+        
+        if valid_config:
+            with open(config_path, 'r+') as config:
+                try:
+                    old_config_data = json.load(config)
+                except json.decoder.JSONDecodeError:
+                    old_config_data = {}
+                
+                if parent_section in old_config_data:
+                    # Need to fix the below so it actually works correctly...
+                    if key in old_config_data[parent_section]:
+                        print("Key already there!")
+                    else:
+                        old_config_data[parent_section][key] = value
+
+                        config.seek(0)
+                        json.dump(old_config_data, config, indent=4)
+                        config.truncate()
+
+                        print(f"Added key '{key}' with value '{value}' to section '{parent_section}'.")
+                else:
+                    print(f'Section: {parent_section} not found in the configuration!')
+
+    # Remove specific key from config file.
+    def remove_key(self, config_path, parent_section, key: str):
+        valid_config = False
+
+        # Checks to make sure that the config actually exists before making any modifications to it.
+        if os.path.exists(config_path):
+            valid_config = True
+        else:
+            valid_config = False
+        
+        if valid_config:
+            with open(config_path, 'r+') as config:
+                try:
+                    old_config_data = json.load(config)
+                except json.decoder.JSONDecodeError:
+                    old_config_data = {}
+                
+                if parent_section in old_config_data:
+                    # Need to fix the below so it actually works correctly...
+                    if key in old_config_data[parent_section]:
+                        old_config_data[parent_section].pop(key)
+
+                        config.seek(0)
+                        json.dump(old_config_data, config, indent=4)
+                        config.truncate()
+
+                        print(f"Removed key '{key}' from section '{parent_section}'.")
+                    else:
+                        print("Key already there!")
+                else:
+                    print(f'Section: {parent_section} not found in the configuration!')
             
-            json_data = json.dump(new_config_data, config)
-            print(json_data)
-            config.write(json_data)
-            print("Wrote new section successfully!")
     
     def remove_section(self, section_name: str):
         pass
 
-    def get(self, config_section: str, config_key: str):
+    def get(self, parent_section: str, config_key: str):
         try:
             with open(str(self.config_path)) as config:
                 config_data = json.load(config)
-                data = config_data[f'{config_section}']
+                data = config_data[f'{parent_section}']
                 for key, value in data.items():
                     if key == str(config_key):
                         return value
@@ -91,7 +167,3 @@ config_file_contents = {
     }
 }
 
-config = config_reader("C:\\Users\\Owner")
-
-config.create_config("config.json")
-config.add_section("C:\\Users\\Owner\\config.json", "about")
