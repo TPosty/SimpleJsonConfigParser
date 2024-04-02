@@ -161,9 +161,4 @@ class config_reader():
         except Exception as error:
             print(error)
 
-config_file_contents = {
-    "general": {
-        "Username": "Tyler"
-    }
-}
 
