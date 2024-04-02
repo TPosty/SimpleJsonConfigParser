@@ -154,7 +154,7 @@ class config_reader():
         
         # Check for KeyError as above we need to enter the key EXACTLY as it's written in the config, otherwise python won't know what to find.
         except KeyError:
-            print(f"Can't find one or more of the values specified in the config file: {config_section}, {config_key}")
+            print(f"Can't find one or more of the values specified in the config file: {parent_section}, {config_key}")
         # We also want to check for AttributeErrors as sometimes I may be dumb and try to loop over a string instead of a dict. haha..haha..
         except AttributeError:
             print("Please check to make sure the values specified in the config aren't strings.")
