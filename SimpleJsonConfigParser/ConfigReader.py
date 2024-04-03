@@ -1,4 +1,3 @@
-# JSON config reader. Currently will only be setup to read JSON config files that are created through this program. Would be interesting to make this into a python module at some point to make JSON config's easier to make and manage.
 import os
 import json
 
@@ -30,7 +29,7 @@ class config_reader():
                         except Exception as error:
                             print(error)
                     else:
-                        config.write("")
+                        config.write("{}")
                         config.close()
             except Exception as error:
                 print(error)
@@ -51,14 +50,13 @@ class config_reader():
             with open(config_path, 'r+') as config:
                 try:
                     old_config_data = json.load(config)
-                    print(old_config_data)
                 except json.decoder.JSONDecodeError:
                     old_config_data = {}
                     print("No config data so initialized with basic data.")
                 
 
                 if section_key in old_config_data:
-                    print(f"The key: {section_key} was already present!")
+                    print(f"The key: '{section_key}' was already present!")
                 else:
                     try:
                         old_config_data.update(new_data)
@@ -68,7 +66,7 @@ class config_reader():
                         json.dump(old_config_data, config, indent=4)
 
                         config.truncate()
-                        print(f"Created new section: {section_key}")
+                        print(f"Created new section: '{section_key}'")
                     except Exception as error:
                         print(error)
         else:
@@ -105,7 +103,7 @@ class config_reader():
 
                         print(f"Added key '{key}' with value '{value}' to section '{parent_section}'.")
                 else:
-                    print(f'Section: {parent_section} not found in the configuration!')
+                    print(f"Section: '{parent_section}' not found in the configuration!")
 
     # Remove specific key from config file.
     def remove_key(self, config_path, parent_section, key: str):
@@ -135,9 +133,9 @@ class config_reader():
 
                         print(f"Removed key '{key}' from section '{parent_section}'.")
                     else:
-                        print("Key already there!")
+                        print(f"Key: '{key}' already there!")
                 else:
-                    print(f'Section: {parent_section} not found in the configuration!')
+                    print(f"Section: '{parent_section}' not found in the configuration!")
             
     
     def remove_section(self, section_name: str):
@@ -151,11 +149,8 @@ class config_reader():
                 for key, value in data.items():
                     if key == str(config_key):
                         return value
-        
-        # Check for KeyError as above we need to enter the key EXACTLY as it's written in the config, otherwise python won't know what to find.
         except KeyError:
             print(f"Can't find one or more of the values specified in the config file: {parent_section}, {config_key}")
-        # We also want to check for AttributeErrors as sometimes I may be dumb and try to loop over a string instead of a dict. haha..haha..
         except AttributeError:
             print("Please check to make sure the values specified in the config aren't strings.")
         except Exception as error:

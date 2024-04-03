@@ -3,3 +3,4 @@
 /SimpleJsonConfigParser.egg-info
 /dist
 /build
+SimpleJsonConfigParser/test.py
