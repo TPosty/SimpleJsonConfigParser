@@ -1,8 +1,9 @@
 name: Publish Python distribution to PyPI
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
