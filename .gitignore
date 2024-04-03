@@ -1,2 +1,5 @@
 
 /venv
+/SimpleJsonConfigParser.egg-info
+/dist
+/build
